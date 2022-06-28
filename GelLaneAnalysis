@@ -13,10 +13,6 @@ import pandas
 os.system('cls')
 
 
-    
-df = pandas.read_csv('b.csv')
-
-
 #Find all the .csv files and store their names
 all_files = os.listdir(".") #finds the files current directory
 csv_files = list(filter(lambda f: f.endswith('.csv'), all_files)) #filter through all the files and only finds the .csv files

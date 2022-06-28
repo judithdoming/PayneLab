@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jun 22 15:50:07 2022
+
+@author: judit
+"""
+import sys
+sys.modules[__name__].__dict__.clear()
+import os
+import matplotlib.pyplot as plt
+from scipy.signal import find_peaks
+import pandas
+os.system('cls')
+
+
+    
+df = pandas.read_csv('b.csv')
+
+
+#Find all the .csv files and store their names
+all_files = os.listdir(".") #finds the files current directory
+csv_files = list(filter(lambda f: f.endswith('.csv'), all_files)) #filter through all the files and only finds the .csv files
+
+#Need to go thorugh each all the .csv files and normalize and plot individually
+csv_files.reverse() #reverse the list of csv files so that it plots a.csv at the top and ladder.csv at the bottom
+peakmax = []
+for i in range(len(csv_files)):
+    
+    df = pandas.read_csv(csv_files[i])
+    GrayVal = df['Gray_Value'] #renaming the gray values 
+    x = df['Distance_(pixels)']
+    ColMax = max(GrayVal)
+    normVal = (ColMax-GrayVal)/ColMax
+    peakmax.append(max(normVal))
+    if i == 0:
+        plt.plot(x,normVal, color='black', linestyle='dashed') #Plotting the ladder
+    elif i>0: #plotting every other file 
+        laneMoved = normVal + peakmax[i-1] #Moving the line to be plotted above the last
+        plt.plot(x,laneMoved)
+        peakmax[i] = max(laneMoved) #finding and storing the peak of the new and moved line
+
+#End of for loop and plotting
+
+#Finding the ladder peaks 
+ladder = pandas.read_csv('ladder.csv')
+
+ladder_y = ladder['Gray_Value']
+#normalizing ladder
+laddermax = max(ladder_y)
+ladder_y = (laddermax - ladder_y)/ laddermax
+peaks, _ = find_peaks(ladder_y, height = 0, distance=50, prominence=0.2)
+#plt.plot(peaks, ladder_y[peaks], 'x')
+linemax = peakmax[len(csv_files)-1]
+for j in range(len(peaks)):
+    plt.axvline(peaks[j], ymin=0, ymax= linemax, color='black', linewidth=0.5)
+
+#Removing x axis and y axis ticks
+plt.gca().axes.get_xaxis().set_visible(False)
+plt.gca().axes.get_yaxis().set_visible(False)
+ 
